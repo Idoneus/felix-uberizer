@@ -5,10 +5,10 @@ trap break INT
 set -euo pipefail
 
 WORKDIR="$1"
+INPUT_FOLDER="$(cd "$(dirname "$2")"; pwd -P)/$(basename "$2")"
 
 cd "$WORKDIR"
 
-INPUT_FOLDER="$2"
 GROUP_ID="$3"
 ARTIFACT_ID="$4"
 VERSION="$5"

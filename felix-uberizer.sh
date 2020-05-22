@@ -16,19 +16,19 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 WORKDIR=".workdir"
-OUTPUT_FOLDER="${WORKDIR}/output"
+EXTRACTOR_OUTPUT_FOLDER="${WORKDIR}/output"
 
 mkdir -p "$WORKDIR"
 
 echo "Creating artifacts and sources based on the input folder"
-bash libs/create-artifacts-and-sources.sh "$WORKDIR" "$INPUT_FOLDER" "$OUTPUT_FOLDER"
+bash libs/create-artifacts-and-sources.sh "$WORKDIR" "$INPUT_FOLDER" "$EXTRACTOR_OUTPUT_FOLDER"
 
 echo "Creating uber jar based on the artifacts folder"
-bash libs/create-uber-jar.sh  "$WORKDIR" "${OUTPUT_FOLDER}/artifacts" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION"
+bash libs/create-uber-jar.sh  "$WORKDIR" "${EXTRACTOR_OUTPUT_FOLDER}/artifacts" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION"
 cp "$WORKDIR/$ARTIFACT_ID-$VERSION.jar" .
 
 echo "Creating sources uber jar based on the sources folder"
-bash libs/create-uber-jar.sh  "$WORKDIR" "${OUTPUT_FOLDER}/sources" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION-sources"
+bash libs/create-uber-jar.sh  "$WORKDIR" "${EXTRACTOR_OUTPUT_FOLDER}/sources" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION-sources"
 cp "$WORKDIR/$ARTIFACT_ID-$VERSION-sources.jar" .
 
 rm -rf "$WORKDIR"

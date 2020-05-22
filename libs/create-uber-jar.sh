@@ -4,26 +4,62 @@ trap break INT
 
 set -euo pipefail
 
-WORKDIR="$1"
-INPUT_FOLDER="$(cd "$(dirname "$2")"; pwd -P)/$(basename "$2")"
+WORKDIR=".workdir"
+EXTRACTOR_FOLDER="$(cd "$(dirname "$WORKDIR/output")"; pwd -P)/$(basename "$WORKDIR/output")"
+INPUT_FOLDER="$EXTRACTOR_FOLDER/$1"
+RESULTS_JSON="$EXTRACTOR_FOLDER/../result.json"
 
 cd "$WORKDIR"
-
+SUFFIX="$2"
 GROUP_ID="$3"
 ARTIFACT_ID="$4"
 VERSION="$5"
 
+INCLUDE_GROUP_IDS="$6"
+EXCLUDE_GROUP_IDS="$7"
+
 REPOSITORY="$PWD/.repository"
 
-function minstall() {
-  classifier=$(basename "$1" .jar | tr -cd '[[:alnum:]]')
-  mvn -q install:install-file -DartifactId=$ARTIFACT_ID -Dclassifier=$classifier -Dfile="$1" -DgroupId=$GROUP_ID -Dversion=$VERSION -Dpackaging=jar -DlocalRepositoryPath=$REPOSITORY
-  deps+="<dependency><groupId>$GROUP_ID</groupId><classifier>$classifier</classifier><artifactId>$ARTIFACT_ID</artifactId><version>$VERSION</version><scope>runtime</scope><exclusions><exclusion><artifactId>*</artifactId><groupId>*</groupId></exclusion></exclusions></dependency>"
+DEPENDENCIES=""
+ARTIFACTS_LIST=()
+
+function createResultArtifactsList() {
+	LIST=( $(cat $RESULTS_JSON | jq -c .bundleExtractionResults[]) )
+	for ARTIFACT in ${LIST[@]}; do
+		APPEND="true"
+		ITEM_GROUP_ID=$(echo "$ARTIFACT" | jq -r .groupId)
+		ITEM_ARTIFACT_ID=$(echo "$ARTIFACT" | jq -r .artifactId)
+	    ITEM_VERSION=$(echo "$ARTIFACT" | jq -r .version)
+
+		if [[ ! $ITEM_GROUP_ID =~ $INCLUDE_GROUP_IDS ]]; then
+			APPEND="false"
+		fi
+		if [[ $ITEM_GROUP_ID =~ $EXCLUDE_GROUP_IDS ]]; then
+			APPEND="false"
+		fi
+
+		if [ "$APPEND" = "true" ]; then
+			ARTIFACTS_LIST+=("${ITEM_ARTIFACT_ID}-${ITEM_VERSION}${SUFFIX}.jar")
+		fi
+	done
 }
 
-deps=""
+function installToLocalRepo() {
+	artifactName=$(basename $1)
+	if [[ " ${ARTIFACTS_LIST[*]} " =~ " ${artifactName} " ]]; then
+		echo "==> Including artifact in uber-jar: $artifactName"
+  		classifier=$(basename "$1" .jar | tr -cd '[[:alnum:]]')
+  		mvn -q install:install-file -DartifactId=$ARTIFACT_ID -Dclassifier=$classifier -Dfile="$1" -DgroupId=$GROUP_ID -Dversion=$VERSION -Dpackaging=jar -DlocalRepositoryPath=$REPOSITORY
+  		DEPENDENCIES+="<dependency><groupId>$GROUP_ID</groupId><classifier>$classifier</classifier><artifactId>$ARTIFACT_ID</artifactId><version>$VERSION</version><scope>runtime</scope><exclusions><exclusion><artifactId>*</artifactId><groupId>*</groupId></exclusion></exclusions></dependency>"
+	fi
+}
+
+# Create result artifact list that is allowed in the uber jar
+createResultArtifactsList
+
+# Go over the artifacts and add if allowed by the input parameters
 for i in $(ls $INPUT_FOLDER); do
-  minstall "$INPUT_FOLDER/$i"
+  installToLocalRepo "$INPUT_FOLDER/$i"
 done
 
 cat >settings.xml <<EOF
@@ -77,7 +113,7 @@ cat >pom.xml <<EOF
 		</plugins>
 	</build>
 	<dependencies>
-		$deps
+		$DEPENDENCIES
 	</dependencies>
 	<repositories>
 		<repository>
@@ -89,5 +125,7 @@ cat >pom.xml <<EOF
 </project>
 EOF
 
+# Execute shade plugin that combines all the jar files to one
 mvn install -s settings.xml >/dev/null 2>&1
+
 cp "target/$ARTIFACT_ID-$VERSION.jar" .

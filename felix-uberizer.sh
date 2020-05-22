@@ -4,31 +4,42 @@ set -euo pipefail
 
 trap break INT
 
+# Default include all group ids
+INCLUDE_GROUP_IDS=".*"
+EXCLUDE_GROUP_IDS=""
+
+# Read all input parameters
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         -s|--input-folder) INPUT_FOLDER="$2"; shift ;;
         -g|--group-id) GROUP_ID="$2"; shift ;;
         -a|--artifact-id) ARTIFACT_ID="$2"; shift ;;
         -v|--version) VERSION="$2"; shift ;;
+        -ig|--include-group-ids) INCLUDE_GROUP_IDS="$2"; shift ;;
+        -eg|--exclude-group-ids) EXCLUDE_GROUP_IDS="$2"; shift ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
 done
 
-WORKDIR=".workdir"
-EXTRACTOR_OUTPUT_FOLDER="${WORKDIR}/output"
+# Create target folder
+mkdir -p "target"
 
+# Create temporary work directory
+WORKDIR=".workdir"
 mkdir -p "$WORKDIR"
 
+EXTRACTOR_OUTPUT_FOLDER="${WORKDIR}/output"
+
 echo "Creating artifacts and sources based on the input folder"
-bash libs/create-artifacts-and-sources.sh "$WORKDIR" "$INPUT_FOLDER" "$EXTRACTOR_OUTPUT_FOLDER"
+bash libs/create-artifacts-and-sources.sh "$INPUT_FOLDER" 
 
 echo "Creating uber jar based on the artifacts folder"
-bash libs/create-uber-jar.sh  "$WORKDIR" "${EXTRACTOR_OUTPUT_FOLDER}/artifacts" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION"
-cp "$WORKDIR/$ARTIFACT_ID-$VERSION.jar" .
+bash libs/create-uber-jar.sh "artifacts" "" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION" "$INCLUDE_GROUP_IDS" "$EXCLUDE_GROUP_IDS"
+cp "$WORKDIR/$ARTIFACT_ID-$VERSION.jar" ./target
 
 echo "Creating sources uber jar based on the sources folder"
-bash libs/create-uber-jar.sh  "$WORKDIR" "${EXTRACTOR_OUTPUT_FOLDER}/sources" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION-sources"
-cp "$WORKDIR/$ARTIFACT_ID-$VERSION-sources.jar" .
+bash libs/create-uber-jar.sh "sources" "-sources" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION-sources" "$INCLUDE_GROUP_IDS" "$EXCLUDE_GROUP_IDS"
+cp "$WORKDIR/$ARTIFACT_ID-$VERSION-sources.jar" ./target
 
 rm -rf "$WORKDIR"

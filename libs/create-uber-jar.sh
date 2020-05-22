@@ -4,31 +4,26 @@ trap break INT
 
 set -euo pipefail
 
-groupId=com.amplexor.aem
-artifactId=amplexor-uber-jar
-version=6.5.4
-repository="$PWD/.repository"
+WORKDIR="$1"
+
+cd "$WORKDIR"
+
+INPUT_FOLDER="$2"
+GROUP_ID="$3"
+ARTIFACT_ID="$4"
+VERSION="$5"
+
+REPOSITORY="$PWD/.repository"
 
 function minstall() {
   classifier=$(basename "$1" .jar | tr -cd '[[:alnum:]]')
-  mvn -q install:install-file -DartifactId=$artifactId -Dclassifier=$classifier -Dfile="$1" -DgroupId=$groupId -Dversion=$version -Dpackaging=jar -DlocalRepositoryPath=$repository
-  echo "installed $classifier to local repo"
-  deps+="<dependency><groupId>$groupId</groupId><classifier>$classifier</classifier><artifactId>$artifactId</artifactId><version>$version</version><scope>runtime</scope><exclusions><exclusion><artifactId>*</artifactId><groupId>*</groupId></exclusion></exclusions></dependency>"
-}
-
-function cleanUp() {
-  if [ -d "$repository" ]; then
-    rm -rf "$repository"
-  fi
-  rm -rf target
-  rm pom.xml
-  rm dependency-reduced-pom.xml
-  rm settings.xml
+  mvn -q install:install-file -DartifactId=$ARTIFACT_ID -Dclassifier=$classifier -Dfile="$1" -DgroupId=$GROUP_ID -Dversion=$VERSION -Dpackaging=jar -DlocalRepositoryPath=$REPOSITORY
+  deps+="<dependency><groupId>$GROUP_ID</groupId><classifier>$classifier</classifier><artifactId>$ARTIFACT_ID</artifactId><version>$VERSION</version><scope>runtime</scope><exclusions><exclusion><artifactId>*</artifactId><groupId>*</groupId></exclusion></exclusions></dependency>"
 }
 
 deps=""
-for i in $(ls $1); do
-  minstall "$1/$i"
+for i in $(ls $INPUT_FOLDER); do
+  minstall "$INPUT_FOLDER/$i"
 done
 
 cat >settings.xml <<EOF
@@ -53,9 +48,9 @@ cat >pom.xml <<EOF
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>$groupId</groupId>
-	<artifactId>$artifactId</artifactId>
-	<version>$version</version>
+	<groupId>$GROUP_ID</groupId>
+	<artifactId>$ARTIFACT_ID</artifactId>
+	<version>$VERSION</version>
 	<packaging>jar</packaging>
 	<build>
 		<plugins>
@@ -72,7 +67,7 @@ cat >pom.xml <<EOF
 						<configuration>
 							<artifactSet>
 								<includes>
-									<include>$groupId:$artifactId:jar:*</include>
+									<include>$GROUP_ID:$ARTIFACT_ID:jar:*</include>
 								</includes>
 							</artifactSet>
 						</configuration>
@@ -88,13 +83,11 @@ cat >pom.xml <<EOF
 		<repository>
 			<id>example-repo</id>
 			<name>Example Repository</name>
-			<url>file://$repository</url>
+			<url>file://$REPOSITORY</url>
 		</repository>
 	</repositories>
 </project>
 EOF
 
-mvn install -s settings.xml
-cp "target/$artifactId-$version.jar" .
-
-cleanUp
+mvn install -s settings.xml >/dev/null 2>&1
+cp "target/$ARTIFACT_ID-$VERSION.jar" .

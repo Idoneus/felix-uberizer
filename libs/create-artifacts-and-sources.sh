@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-echo "$1"
-echo "$2"
-curl -H "Accept: application/zip" http://somerepo.example.org/myjar-1.0.jarhttps://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.0.0/felix-bundle-extractor-1.0.0.jar > felix-bundle-extractor.jar
+WORKDIR="$1"
+INPUT_FOLDER="$2"
+OUTPUT_FOLDER="$3"
 
+curl -s https://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.0.1/felix-bundle-extractor-1.0.1.jar > "$WORKDIR"/felix-bundle-extractor.jar
+
+java -jar "$WORKDIR"/felix-bundle-extractor.jar -i "${INPUT_FOLDER}" -o "${OUTPUT_FOLDER}" >/dev/null 2>&1

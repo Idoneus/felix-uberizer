@@ -20,3 +20,9 @@ Execute the bash scripts with the following arguments:
 ### Optional:
 * -ig/--include-group-ids: Regex to only include a subset of group ids (ex. ```(com.adobe.*|org.apache.sling.*|org.apache.felix.*)```)
 * -eg/--exclude-group-ids: Regex to exclude from the previously included group ids (ex. ```(com.adobe.forms.*)```)
+
+### Example startup command
+
+```
+bash felix-uberizer.sh --input-folder ~/Temp/extractor/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*)"
+```

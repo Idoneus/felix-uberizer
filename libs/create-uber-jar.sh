@@ -18,10 +18,18 @@ VERSION="$5"
 INCLUDE_GROUP_IDS="$6"
 EXCLUDE_GROUP_IDS="$7"
 
+DEBUG="$8"
+
 REPOSITORY="$PWD/.repository"
 
 DEPENDENCIES=""
 ARTIFACTS_LIST=()
+
+function debug() { 
+	if [ ! -z $DEBUG ]; then
+ 		echo "### $*";
+ 	fi
+}
 
 function createResultArtifactsList() {
 	LIST=( $(cat $RESULTS_JSON | jq -c .bundleExtractionResults[]) )
@@ -32,10 +40,14 @@ function createResultArtifactsList() {
 	    ITEM_VERSION=$(echo "$ARTIFACT" | jq -r .version)
 
 		if [[ ! $ITEM_GROUP_ID =~ $INCLUDE_GROUP_IDS ]]; then
+			debug "not including $ITEM_GROUP_ID because it does not match include group pattern: $INCLUDE_GROUP_IDS"
 			APPEND="false"
 		fi
-		if [[ $ITEM_GROUP_ID =~ $EXCLUDE_GROUP_IDS ]]; then
-			APPEND="false"
+		if [ ! -z $EXCLUDE_GROUP_IDS ]; then
+			if [[ $ITEM_GROUP_ID =~ $EXCLUDE_GROUP_IDS ]]; then
+				debug "not including $ITEM_GROUP_ID because it matches exclude group pattern: $EXCLUDE_GROUP_IDS"
+				APPEND="false"
+			fi
 		fi
 
 		if [ "$APPEND" = "true" ]; then
@@ -56,6 +68,7 @@ function installToLocalRepo() {
 
 # Create result artifact list that is allowed in the uber jar
 createResultArtifactsList
+debug "Result artifact list: ${ARTIFACTS_LIST[*]}"
 
 # Go over the artifacts and add if allowed by the input parameters
 for i in $(ls $INPUT_FOLDER); do
@@ -126,6 +139,10 @@ cat >pom.xml <<EOF
 EOF
 
 # Execute shade plugin that combines all the jar files to one
-mvn install -s settings.xml >/dev/null 2>&1
+if [ ! -z $DEBUG ]; then
+	mvn install -s settings.xml
+else 
+	mvn install -s settings.xml >/dev/null 2>&1
+fi
 
 cp "target/$ARTIFACT_ID-$VERSION.jar" .

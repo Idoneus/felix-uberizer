@@ -33,11 +33,11 @@ Execute docker / bash with the following arguments:
 ```
 docker build --pull --rm -f "Dockerfile" -t felixuberizer:latest "."
 
-docker run --rm -it --mount type=bind,source=/my/aem/crx-quickstart/launchpad/felix,target=/tmp/felix-uberizer/input --mount type=bind,source="$(pwd)"/target,target=/tmp/felix-uberizer/target felixuberizer:latest -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*)"
+docker run --rm -it --mount type=bind,source=/my/aem/crx-quickstart/launchpad/felix,target=/tmp/felix-uberizer/input --mount type=bind,source="$(pwd)"/target,target=/tmp/felix-uberizer/target felixuberizer:latest -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)"
 ```
 
 #### Bash
 
 ```
-bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*)"
+bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)"
 ```

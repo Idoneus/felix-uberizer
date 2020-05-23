@@ -1,5 +1,5 @@
 .vscode/
-target/
+target/*
 !target/.keep
 .workdir/
 .DS_Store

@@ -24,6 +24,7 @@ Execute docker / bash with the following arguments:
 ### Optional:
 * -ig/--include-group-ids: Regex to only include a subset of group ids (ex. ```(com.adobe.*|org.apache.sling.*|org.apache.felix.*)```)
 * -eg/--exclude-group-ids: Regex to exclude from the previously included group ids (ex. ```(com.adobe.forms.*)```)
+* -ea/--exclude-artifact-ids: Regex to exclude artifact ids (ex ```(com.adobe.granite.poi.*)```)
 * -d/--debug: Show debug logging
 
 ### Example startup command
@@ -33,11 +34,11 @@ Execute docker / bash with the following arguments:
 ```
 docker build --pull --rm -f "Dockerfile" -t felixuberizer:latest "."
 
-docker run --rm -it --mount type=bind,source=/my/aem/crx-quickstart/launchpad/felix,target=/tmp/felix-uberizer/input --mount type=bind,source="$(pwd)"/target,target=/tmp/felix-uberizer/target felixuberizer:latest -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)"
+docker run --rm -it --mount type=bind,source=/my/aem/crx-quickstart/launchpad/felix,target=/tmp/felix-uberizer/input --mount type=bind,source="$(pwd)"/target,target=/tmp/felix-uberizer/target felixuberizer:latest -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)" -ea 'com.adobe.granite.poi.*|.*.fop'
 ```
 
 #### Bash
 
 ```
-bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)"
+bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.1.0)" -ea 'com.adobe.granite.poi.*|.*.fop'
 ```

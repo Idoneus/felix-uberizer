@@ -4,12 +4,15 @@ WORKDIR=".workdir"
 OUTPUT_FOLDER=".workdir/output"
 
 INPUT_FOLDER="$1"
-DEBUG="$2"
+EXCLUDE_GROUP_IDS="$2"
+EXCLUDE_ARTIFACT_IDS="$3"
+DEBUG="$4"
 
-curl -s https://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.0.1/felix-bundle-extractor-1.0.1.jar > "$WORKDIR"/felix-bundle-extractor.jar
+curl -s https://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.1.0/felix-bundle-extractor-1.1.0.jar > "$WORKDIR"/felix-bundle-extractor.jar
 
+# Executing the felix bundle extractor. Defaulting to not extracting non maven artifacts
 if [ ! -z $DEBUG ]; then
-	java -jar "$WORKDIR"/felix-bundle-extractor.jar -i "${INPUT_FOLDER}" -o "${OUTPUT_FOLDER}"
+	java -jar "$WORKDIR"/felix-bundle-extractor.jar -i "${INPUT_FOLDER}" -o "${OUTPUT_FOLDER}" -enma -eg "${EXCLUDE_GROUP_IDS}" -ea "${EXCLUDE_ARTIFACT_IDS}" 
 else 
-	java -jar "$WORKDIR"/felix-bundle-extractor.jar -i "${INPUT_FOLDER}" -o "${OUTPUT_FOLDER}" >/dev/null 2>&1
+	java -jar "$WORKDIR"/felix-bundle-extractor.jar -i "${INPUT_FOLDER}" -o "${OUTPUT_FOLDER}" -enma -eg "${EXCLUDE_GROUP_IDS}" -ea "${EXCLUDE_ARTIFACT_IDS}" >/dev/null 2>&1
 fi

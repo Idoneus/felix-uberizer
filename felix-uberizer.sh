@@ -8,6 +8,9 @@ trap break INT
 INCLUDE_GROUP_IDS=".*"
 EXCLUDE_GROUP_IDS=""
 
+# Default include all artifacts
+EXCLUDE_ARTIFACT_IDS=""
+
 # Default input folder, used mainly in the Dockerfile
 INPUT_FOLDER=/tmp/felix-uberizer/input
 
@@ -23,6 +26,7 @@ while [[ "$#" -gt 0 ]]; do
         -v|--version) VERSION="$2"; shift ;;
         -ig|--include-group-ids) INCLUDE_GROUP_IDS="$2"; shift ;;
         -eg|--exclude-group-ids) EXCLUDE_GROUP_IDS="$2"; shift ;;
+        -ea|--exclude-artifact-ids) EXCLUDE_ARTIFACT_IDS="$2"; shift ;;
         -d|--debug) DEBUG=1 ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -39,7 +43,7 @@ mkdir -p "$WORKDIR"
 EXTRACTOR_OUTPUT_FOLDER="${WORKDIR}/output"
 
 echo "Creating artifacts and sources based on the input folder"
-bash libs/create-artifacts-and-sources.sh "$INPUT_FOLDER" "$DEBUG"
+bash libs/create-artifacts-and-sources.sh "$INPUT_FOLDER" "$EXCLUDE_GROUP_IDS" "$EXCLUDE_ARTIFACT_IDS" "$DEBUG" 
 
 echo "Creating uber jar based on the artifacts folder"
 bash libs/create-uber-jar.sh "artifacts" "" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION" "$INCLUDE_GROUP_IDS" "$EXCLUDE_GROUP_IDS" "$DEBUG"

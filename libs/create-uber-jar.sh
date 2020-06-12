@@ -7,7 +7,7 @@ set -euo pipefail
 WORKDIR=".workdir"
 EXTRACTOR_FOLDER="$(cd "$(dirname "$WORKDIR/output")"; pwd -P)/$(basename "$WORKDIR/output")"
 INPUT_FOLDER="$EXTRACTOR_FOLDER/$1"
-RESULTS_JSON="$EXTRACTOR_FOLDER/../result.json"
+RESULTS_JSON="$EXTRACTOR_FOLDER/result.json"
 
 cd "$WORKDIR"
 SUFFIX="$2"

@@ -40,5 +40,5 @@ docker run --rm -it --mount type=bind,source=/my/aem/crx-quickstart/launchpad/fe
 #### Bash
 
 ```
-bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.1.0)" -ea 'com.adobe.granite.poi.*|.*.fop'
+bash felix-uberizer.sh --input-folder /my/aem/crx-quickstart/launchpad/felix -g be.idoneus.aem -a idoneus-uber-jar -v 1.0.0 -ig "(org.apache.sling.*|org.apache.felix.*|org.apache.jackrabbit.*|org.apache.oak.*|com.adobe.*|com.day.*)" -ea 'com.adobe.granite.poi.*|.*.fop'
 ```

@@ -53,4 +53,7 @@ echo "Creating sources uber jar based on the sources folder"
 bash libs/create-uber-jar.sh "sources" "-sources" "$GROUP_ID" "$ARTIFACT_ID" "$VERSION-sources" "$INCLUDE_GROUP_IDS" "$EXCLUDE_GROUP_IDS" "$DEBUG"
 cp "$WORKDIR/$ARTIFACT_ID-$VERSION-sources.jar" ./target
 
-rm -rf "$WORKDIR"
+if [ -z $DEBUG ]; then
+    # Removing the temporary working directory
+    rm -rf "$WORKDIR"
+fi

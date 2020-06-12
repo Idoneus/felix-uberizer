@@ -8,7 +8,11 @@ EXCLUDE_GROUP_IDS="$2"
 EXCLUDE_ARTIFACT_IDS="$3"
 DEBUG="$4"
 
-curl -s https://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.1.0/felix-bundle-extractor-1.1.0.jar > "$WORKDIR"/felix-bundle-extractor.jar
+# Can be used when developing
+# curl -s https://oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=be.idoneus.felix&a=felix-bundle-extractor&v=LATEST > "$WORKDIR"/felix-bundle-extractor.jar
+
+# Production URL for bundle extractor
+curl -s https://oss.sonatype.org/service/local/repositories/releases/content/be/idoneus/felix/felix-bundle-extractor/1.1.1/felix-bundle-extractor-1.1.1.jar > "$WORKDIR"/felix-bundle-extractor.jar
 
 # Executing the felix bundle extractor. Defaulting to not extracting non maven artifacts
 if [ ! -z $DEBUG ]; then
